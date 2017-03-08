@@ -2,46 +2,82 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using MSnake.Models;
 
-namespace Snakegame
+namespace MSnake
 {
     class Program
     {
         static void Main(string[] args)
         {
-            
-            Random random = new Random();
-            int[, ,] pointpos = new int[3, 3, 3];//массив для чек поинтов
-            for (int i = 0; i < pointpos.GetLength(0); i++)
-            {
-                pointpos[i, 0, 0] = random.Next(5, 10);//заполняем массив
-                pointpos[0, i, 0] = random.Next(5, 10);//заполняем массив
-                pointpos[0, 0, i] = 0;
-                Console.SetCursorPosition(pointpos[0, i, 0], pointpos[i, 0, 0]);
-                Console.Write("@");//выводим на экран чек поинты
-            }
-            Console.SetCursorPosition(0, 0);
-            Console.Write("*");//выводим нашу змейку
-            while (K != ConsoleKey.Escape)// пока не нажата клавиша ESC
-            {
-                
-                for (int i = 0; i < pointpos.GetLength(0); i++)
-                {
-                    if (x == pointpos[0, i, 0] && y == pointpos[i, 0, 0]) // если положение x и y совпадает с положением чек поинта
-                    {
-                        if (pointpos[0, 0, i] == 0)// если чек поинт не "съеден"(значение его 0)
-                        {
-                            playersize += 1; // добавляем единицу к размеру змейки
-                            pointpos[0, 0, i] = 1;// помечаем чек поинт как "съеденый"(присваиваем ему значение 1)
-                        }
-                    }
-                }
-                
-            }
+            Game.lala();
 
+            Thread myThread = new Thread(AutoMoveSnake);
+            myThread.Start();
+            
+          
+            while (Game.game) //true
+            {
+                do
+                {
+                    Game.btn = Console.ReadKey();
+                } while (Convert.ToString(Game.btn.Key) == Game.last);
+                
+                switch (Game.btn.Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        Game.i = 1;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        Game.i = 3;
+                        break;
+                    case ConsoleKey.LeftArrow:
+                        Game.i = 4;
+                        break;
+                    case ConsoleKey.RightArrow:
+                        Game.i = 2;
+                        break;
+                    case ConsoleKey.Escape:
+                        Game.game = false;
+                        break;
+                    case ConsoleKey.F1:
+                        Game.Serialize();
+                        break;
+                    case ConsoleKey.F2:
+                        Game.Deserialize();
+                        break;
+                }
+            }
         }
 
-        
+        public static void AutoMoveSnake()
+        {
+            while (Game.game)
+            {
+                Game.Draw();
+                Thread.Sleep(400);
+                switch (Game.i)
+                {
+                    case 1:
+                        Game.snake.Move(0, -1);
+                        Game.last = Convert.ToString(ConsoleKey.DownArrow);
+                        break;
+                    case 2:
+                        Game.snake.Move(1, 0);
+                        Game.last = Convert.ToString(ConsoleKey.LeftArrow);
+                        break;
+                    case 3:
+                        Game.snake.Move(0, 1);
+                        Game.last = Convert.ToString(ConsoleKey.UpArrow);
+                        break;
+                    case 4:
+                        Game.snake.Move(-1, 0);
+                        Game.last = Convert.ToString(ConsoleKey.RightArrow);
+                        break;
+                }
+            }
+        }
     }
 }
